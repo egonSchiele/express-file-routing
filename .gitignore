@@ -9,7 +9,6 @@
 /coverage
 
 # build
-/dist
 
 # env
 .env

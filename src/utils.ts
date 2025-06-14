@@ -1,7 +1,6 @@
-import type { Handler } from "express"
 import type { ParsedPath } from "path"
 
-import type { Route } from "./types"
+import type { HandlerWithReturn, Route } from "./types"
 
 import config from "./config"
 
@@ -20,7 +19,9 @@ export const isFileIgnored = (parsedFile: ParsedPath) =>
   parsedFile.name.startsWith(config.IGNORE_PREFIX_CHAR) ||
   parsedFile.dir.startsWith(`/${config.IGNORE_PREFIX_CHAR}`)
 
-export const isHandler = (handler: unknown): handler is Handler | Handler[] =>
+export const isHandler = (
+  handler: unknown
+): handler is HandlerWithReturn | HandlerWithReturn[] =>
   typeof handler === "function" || Array.isArray(handler)
 
 /**
@@ -81,20 +82,25 @@ export const convertCatchallSyntax = (url: string) =>
 
 export const buildRoutePath = (parsedFile: ParsedPath): string => {
   // Normalize the directory path
-  const normalizedDir = parsedFile.dir === parsedFile.root ? '/' : parsedFile.dir.startsWith('/') ? parsedFile.dir : `/${parsedFile.dir}`;
-  
+  const normalizedDir =
+    parsedFile.dir === parsedFile.root
+      ? "/"
+      : parsedFile.dir.startsWith("/")
+      ? parsedFile.dir
+      : `/${parsedFile.dir}`
+
   // Handle index files specially
-  if (parsedFile.name === 'index') {
-    return normalizedDir === '/' ? '/' : normalizedDir;
+  if (parsedFile.name === "index") {
+    return normalizedDir === "/" ? "/" : normalizedDir
   }
-  
+
   // Handle index.something files (like index.mod)
-  if (parsedFile.name.startsWith('index.')) {
-    return normalizedDir === '/' ? '/' : normalizedDir;
+  if (parsedFile.name.startsWith("index.")) {
+    return normalizedDir === "/" ? "/" : normalizedDir
   }
-  
+
   // For regular files
-  return `${normalizedDir === '/' ? '' : normalizedDir}/${parsedFile.name}`;
+  return `${normalizedDir === "/" ? "" : normalizedDir}/${parsedFile.name}`
 }
 
 /**
@@ -122,7 +128,9 @@ export const calculatePriority = (url: string) => {
   return depth + specifity + catchall
 }
 
-export const getHandlers = (handler: Handler | Handler[]): Handler[] => {
+export const getHandlers = (
+  handler: HandlerWithReturn | HandlerWithReturn[]
+): HandlerWithReturn[] => {
   if (!Array.isArray(handler)) return [handler]
   return handler
 }
