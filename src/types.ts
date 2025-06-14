@@ -1,5 +1,23 @@
 import type { Express, Router, Handler } from "express"
 
+export type ReplaceReturnType<T, TNewReturn> = T extends (
+  ...args: infer A
+) => any
+  ? (...args: A) => TNewReturn
+  : never
+
+export type JSONResponse =
+  | Record<string, any>
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+export type HandlerWithReturn = ReplaceReturnType<
+  Handler,
+  Promise<JSONResponse>
+>
+
 export type ExpressLike = Express | Router
 
 export interface Options {
@@ -42,7 +60,7 @@ export interface File {
   rel: string
 }
 
-type MethodExport = Handler | Handler[]
+type MethodExport = HandlerWithReturn | HandlerWithReturn[]
 
 interface MethodExports {
   get?: MethodExport

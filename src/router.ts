@@ -1,11 +1,12 @@
 import path from "path"
 
-import type { ExpressLike, Options } from "./types"
+import type { ExpressLike, HandlerWithReturn, Options } from "./types"
 
 import config from "./config"
 
 import { generateRoutes, walkTree } from "./lib"
 import { getHandlers, getMethodKey, isHandler } from "./utils"
+import { Handler, NextFunction, Request, Response } from "express"
 
 const CJS_MAIN_FILENAME =
   typeof require !== "undefined" && require.main?.filename
@@ -44,10 +45,25 @@ const createRouter = async <T extends ExpressLike = ExpressLike>(
       if (
         !options.additionalMethods?.includes(methodKey) &&
         !config.DEFAULT_METHOD_EXPORTS.includes(methodKey)
-      )
+      ) {
         continue
+      }
 
-      app[methodKey](url, ...handlers)
+      const wrappedHandlers = handlers.map((handler: HandlerWithReturn) => {
+        return async (req: Request, res: Response, next: NextFunction) => {
+          try {
+            const result = await handler(req, res, next)
+            if (result !== undefined) {
+              res.json(result)
+            }
+            res.end()
+          } catch (error) {
+            res.status(500).send("Internal Server Error").end()
+          }
+        }
+      })
+
+      app[methodKey](url, ...wrappedHandlers)
     }
 
     // wildcard default export route matching
