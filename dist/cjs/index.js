@@ -1,8 +1,9 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var express = require('express');
-var path = require('path');
 var fs = require('fs');
+var path = require('path');
+var typestache = require('typestache');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -24,6 +25,7 @@ function _interopNamespace(e) {
     return Object.freeze(n);
 }
 
+var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 
 /******************************************************************************
@@ -229,6 +231,61 @@ const generateRoutes = (files) => __awaiter(void 0, void 0, void 0, function* ()
     }
     return prioritizeRoutes(routes);
 });
+function urlToFunctionName(url, method) {
+    return [...url.split("/"), method.toLowerCase()]
+        .filter(Boolean)
+        .map((part, i) => {
+        let newPart = part.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+        if (i > 0)
+            newPart = capitalize(newPart);
+        return newPart;
+    })
+        .join("");
+}
+function urlToArgs(url) {
+    const defaultArgs = ["options:Record<string, any> = {}"];
+    const args = [];
+    url
+        .split("/")
+        .filter(part => part.startsWith(":"))
+        .forEach(part => {
+        const argName = part.slice(1);
+        if (argName) {
+            args.push(`${argName}: string | number`);
+        }
+    });
+    args.push(...defaultArgs);
+    return args.join(", ");
+}
+function urlToUrlString(url) {
+    return url
+        .split("/")
+        .map(part => {
+        if (part.startsWith(":")) {
+            return `\${${part.slice(1)}}`;
+        }
+        return part;
+    })
+        .join("/");
+}
+function capitalize(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+// THIS FILE WAS AUTO-GENERATED
+const template = `export function {{functionName:string}}({{{args:string}}}): Promise<Response> {
+    return fetch(\`{{url:string}}\`, {
+        method: "{{method:string}}",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        ...options,
+    });
+}
+`;
+const render = (args) => {
+    return typestache.apply(template, args);
+};
 
 var _a;
 const CJS_MAIN_FILENAME = typeof require !== "undefined" && ((_a = require.main) === null || _a === void 0 ? void 0 : _a.filename);
@@ -250,26 +307,14 @@ const wrapHandler = (handler) => {
     });
     return wrappedHandler;
 };
-/**
- * Attach routes to an Express app or router instance
- *
- * ```ts
- * await createRouter(app)
- * ```
- *
- * @param app An express app or router instance
- * @param options An options object (optional)
- */
-const createRouter = (app, options = {}) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b;
-    const files = walkTree(options.directory || path__default["default"].join(PROJECT_DIRECTORY, "routes"));
-    const routes = yield generateRoutes(files);
+const makeRoutes = (app, routes, options = {}) => {
+    var _a;
     for (const { url, exports } of routes) {
         const exportedMethods = Object.entries(exports);
         for (const [method, handler] of exportedMethods) {
             const methodKey = getMethodKey(method);
             const handlers = getHandlers(handler);
-            if (!((_b = options.additionalMethods) === null || _b === void 0 ? void 0 : _b.includes(methodKey)) &&
+            if (!((_a = options.additionalMethods) === null || _a === void 0 ? void 0 : _a.includes(methodKey)) &&
                 !config.DEFAULT_METHOD_EXPORTS.includes(methodKey)) {
                 continue;
             }
@@ -292,6 +337,60 @@ const createRouter = (app, options = {}) => __awaiter(void 0, void 0, void 0, fu
                 ]);
             }
         }
+    }
+};
+const makeApiClient = (routes, options = {}) => {
+    var _a;
+    if (!options.apiClientDirectory) {
+        return;
+    }
+    // make options.apiClientDirectory if it does not exist
+    const dirExists = fs__default["default"].existsSync(options.apiClientDirectory);
+    if (!dirExists) {
+        console.log(`API client directory does not exist, creating: ${options.apiClientDirectory}`);
+        fs__default["default"].mkdirSync(options.apiClientDirectory, { recursive: true });
+    }
+    const apiClientPath = path__default["default"].join(options.apiClientDirectory, "apiClient.ts");
+    let content = "// Auto-generated API client\n\n";
+    for (const { url, exports } of routes) {
+        const exportedMethods = Object.entries(exports);
+        for (const [method, handler] of exportedMethods) {
+            const methodKey = getMethodKey(method);
+            if (!((_a = options.additionalMethods) === null || _a === void 0 ? void 0 : _a.includes(methodKey)) &&
+                !config.DEFAULT_METHOD_EXPORTS.includes(methodKey)) {
+                continue;
+            }
+            const methodName = methodKey.toUpperCase();
+            if (url.startsWith("/api/")) {
+                content +=
+                    render({
+                        url: urlToUrlString(url),
+                        args: urlToArgs(url),
+                        method: methodName,
+                        functionName: urlToFunctionName(url, methodName)
+                    }) + "\n";
+            }
+        }
+    }
+    fs__default["default"].writeFileSync(apiClientPath, content, "utf8");
+    console.log(`API client generated at: ${apiClientPath}`);
+};
+/**
+ * Attach routes to an Express app or router instance
+ *
+ * ```ts
+ * await createRouter(app)
+ * ```
+ *
+ * @param app An express app or router instance
+ * @param options An options object (optional)
+ */
+const createRouter = (app, options = {}) => __awaiter(void 0, void 0, void 0, function* () {
+    const files = walkTree(options.directory || path__default["default"].join(PROJECT_DIRECTORY, "routes"));
+    const routes = yield generateRoutes(files);
+    makeRoutes(app, routes, options);
+    if (options.apiClientDirectory) {
+        makeApiClient(routes, options);
     }
     return app;
 });

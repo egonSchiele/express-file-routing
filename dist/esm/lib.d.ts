@@ -16,3 +16,7 @@ export declare const walkTree: (directory: string, tree?: string[]) => File[];
  * @returns An array of routes
  */
 export declare const generateRoutes: (files: File[]) => Promise<Route[]>;
+export declare function urlToFunctionName(url: string, method: string): string;
+export declare function urlToArgs(url: string): string;
+export declare function urlToUrlString(url: string): string;
+export declare function capitalize(string: string): string;
