@@ -76,3 +76,18 @@ export const generateRoutes = async (files: File[]) => {
 
   return prioritizeRoutes(routes)
 }
+
+export function urlToFunctionName(url: string, method: string): string {
+  return [...url.split("/"), method.toLowerCase()]
+    .filter(Boolean)
+    .map((part, i) => {
+      let newPart = part.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()
+      if (i > 0) newPart = capitalize(newPart)
+      return newPart
+    })
+    .join("")
+}
+
+export function capitalize(string: string): string {
+  return string.charAt(0).toUpperCase() + string.slice(1)
+}

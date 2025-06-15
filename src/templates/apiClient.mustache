@@ -1,0 +1,9 @@
+export function {{functionName:string}}(options:Record<string, any> = {}): Promise<Response> {
+    return fetch(`{{url:string}}`, {
+        method: "{{method:string}}",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        ...options,
+    });
+}

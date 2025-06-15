@@ -6,8 +6,9 @@ import type { ExpressLike, HandlerWithReturn, Options, Route } from "./types"
 import config from "./config"
 
 import { Handler, NextFunction, Request, Response } from "express"
-import { generateRoutes, walkTree } from "./lib"
+import { generateRoutes, urlToFunctionName, walkTree } from "./lib"
 import { getHandlers, getMethodKey, isHandler } from "./utils"
+import renderClientTemplate from "./templates/apiClient"
 
 const CJS_MAIN_FILENAME =
   typeof require !== "undefined" && require.main?.filename
@@ -91,19 +92,34 @@ const makeApiClient = (routes: Route[], options: Options = {}): void => {
     )
     fs.mkdirSync(options.apiClientDirectory, { recursive: true })
   }
-  const apiClientPath = path.join(options.apiClientDirectory, "api-client.ts")
+  const apiClientPath = path.join(options.apiClientDirectory, "apiClient.ts")
   let content = "// Auto-generated API client\n\n"
-  content += `import { Request, Response } from 'express';\n\n`
   for (const { url, exports } of routes) {
     const exportedMethods = Object.entries(exports)
 
     for (const [method, handler] of exportedMethods) {
       const methodKey = getMethodKey(method)
-      console.log(`fetching method: ${methodKey} for URL: ${url}`)
+      const handlers = getHandlers(handler)
+
+      if (
+        !options.additionalMethods?.includes(methodKey) &&
+        !config.DEFAULT_METHOD_EXPORTS.includes(methodKey)
+      ) {
+        continue
+      }
+      const methodName = methodKey.toUpperCase()
+      if (url.startsWith("/api/")) {
+        content +=
+          renderClientTemplate({
+            url,
+            method: methodName,
+            functionName: urlToFunctionName(url, methodName)
+          }) + "\n"
+      }
     }
   }
 
-  fs.writeFileSync(apiClientPath, "testing")
+  fs.writeFileSync(apiClientPath, content, "utf8")
   console.log(`API client generated at: ${apiClientPath}`)
 }
 /**

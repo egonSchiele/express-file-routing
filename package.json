@@ -14,7 +14,8 @@
     "build:tsc": "tsc && tsc --module commonjs --outDir dist/cjs",
     "postbuild": "sh ./postbuild.sh",
     "prepublish": "npm run build",
-    "dev": "ts-node-dev --transpile-only --files --quiet ./examples/with-typescript/app.ts"
+    "dev": "ts-node-dev --transpile-only --files --quiet ./examples/with-typescript/app.ts",
+    "templates": "typestache /Users/adit/express-file-routing/src/templates -v"
   },
   "exports": {
     "import": "./dist/esm/index.js",
@@ -48,5 +49,8 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "dependencies": {
+    "typestache": "^0.4.4"
+  }
 }
