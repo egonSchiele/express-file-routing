@@ -88,6 +88,34 @@ export function urlToFunctionName(url: string, method: string): string {
     .join("")
 }
 
+export function urlToArgs(url: string): string {
+  const defaultArgs = ["options:Record<string, any> = {}"]
+  const args: string[] = []
+  url
+    .split("/")
+    .filter(part => part.startsWith(":"))
+    .forEach(part => {
+      const argName = part.slice(1)
+      if (argName) {
+        args.push(`${argName}: string | number`)
+      }
+    })
+  args.push(...defaultArgs)
+  return args.join(", ")
+}
+
+export function urlToUrlString(url: string): string {
+  return url
+    .split("/")
+    .map(part => {
+      if (part.startsWith(":")) {
+        return `\${${part.slice(1)}}`
+      }
+      return part
+    })
+    .join("/")
+}
+
 export function capitalize(string: string): string {
   return string.charAt(0).toUpperCase() + string.slice(1)
 }

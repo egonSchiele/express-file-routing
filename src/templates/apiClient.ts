@@ -3,7 +3,7 @@
 // Any manual changes will be lost.
 import { apply } from "typestache";
 
-export const template = `export function {{functionName:string}}(options:Record<string, any> = {}): Promise<Response> {
+export const template = `export function {{functionName:string}}({{{args:string}}}): Promise<Response> {
     return fetch(\`{{url:string}}\`, {
         method: "{{method:string}}",
         headers: {
@@ -16,6 +16,7 @@ export const template = `export function {{functionName:string}}(options:Record<
 
 export type TemplateType = {
   functionName: string;
+  args: string;
   url: string;
   method: string;
 };

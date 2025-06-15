@@ -1,4 +1,4 @@
-export function {{functionName:string}}(options:Record<string, any> = {}): Promise<Response> {
+export function {{functionName:string}}({{{args:string}}}): Promise<Response> {
     return fetch(`{{url:string}}`, {
         method: "{{method:string}}",
         headers: {

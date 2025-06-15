@@ -6,7 +6,13 @@ import type { ExpressLike, HandlerWithReturn, Options, Route } from "./types"
 import config from "./config"
 
 import { Handler, NextFunction, Request, Response } from "express"
-import { generateRoutes, urlToFunctionName, walkTree } from "./lib"
+import {
+  generateRoutes,
+  urlToArgs,
+  urlToFunctionName,
+  urlToUrlString,
+  walkTree
+} from "./lib"
 import { getHandlers, getMethodKey, isHandler } from "./utils"
 import renderClientTemplate from "./templates/apiClient"
 
@@ -111,7 +117,8 @@ const makeApiClient = (routes: Route[], options: Options = {}): void => {
       if (url.startsWith("/api/")) {
         content +=
           renderClientTemplate({
-            url,
+            url: urlToUrlString(url),
+            args: urlToArgs(url),
             method: methodName,
             functionName: urlToFunctionName(url, methodName)
           }) + "\n"
