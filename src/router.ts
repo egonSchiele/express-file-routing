@@ -36,6 +36,7 @@ const wrapHandler = (handler: HandlerWithReturn): Handler => {
       }
       res.end()
     } catch (error) {
+      console.error("Error in handler:", error)
       res.status(500).send("Internal Server Error").end()
     }
   }
@@ -106,7 +107,6 @@ const makeApiClient = (routes: Route[], options: Options = {}): void => {
   for (const { url, exports } of routes) {
     const exportedMethods = Object.entries(exports)
     const methodNames = exportedMethods.map(([method, handler]) => method)
-    console.log({ methodNames })
     for (const [method, handler] of exportedMethods) {
       const methodKey = getMethodKey(method)
       const handlers = getHandlers(handler)
