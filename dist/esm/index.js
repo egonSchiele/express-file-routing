@@ -248,14 +248,18 @@ function capitalize(string) {
 }
 
 // THIS FILE WAS AUTO-GENERATED
-const template = `export function {{functionName:string}}({{{args:string}}}): Promise<Response> {
-    return fetch(\`{{url:string}}\`, {
+const template = `export async function {{functionName:string}}({{{args:string}}}): Promise<{{responseType:string}}> {
+    const response = await fetch(\`{{url:string}}\`, {
         method: "{{method:string}}",
         headers: {
           "Content-Type": "application/json",
         },
         ...options,
     });
+    if (!response.ok) {
+        console.log(\`Error calling API {{functionName}}\`);
+    }
+    return response.json();
 }
 `;
 const render = (args) => {
@@ -326,9 +330,13 @@ const makeApiClient = (routes, options = {}) => {
         fs.mkdirSync(options.apiClientDirectory, { recursive: true });
     }
     const apiClientPath = path.join(options.apiClientDirectory, "apiClient.ts");
-    let content = "// Auto-generated API client\n\n";
+    let header = "// Auto-generated API client\n\n";
+    let content = "";
+    const typesToImport = [];
     for (const { url, exports } of routes) {
         const exportedMethods = Object.entries(exports);
+        const methodNames = exportedMethods.map(([method, handler]) => method);
+        console.log({ methodNames });
         for (const [method, handler] of exportedMethods) {
             const methodKey = getMethodKey(method);
             if (!((_a = options.additionalMethods) === null || _a === void 0 ? void 0 : _a.includes(methodKey)) &&
@@ -336,17 +344,31 @@ const makeApiClient = (routes, options = {}) => {
                 continue;
             }
             const methodName = methodKey.toUpperCase();
+            let responseType = "any";
+            const typeVarName = `${methodName.toLowerCase()}Type`;
+            if (options.apiClientTypeFile && methodNames.includes(typeVarName)) {
+                const typeExport = exportedMethods.find(([key]) => key === typeVarName);
+                if (typeExport) {
+                    responseType = typeExport[1];
+                    typesToImport.push(responseType);
+                }
+            }
             if (url.startsWith("/api/")) {
                 content +=
                     render({
                         url: urlToUrlString(url),
                         args: urlToArgs(url),
                         method: methodName,
+                        responseType,
                         functionName: urlToFunctionName(url, methodName)
                     }) + "\n";
             }
         }
     }
+    if (typesToImport.length > 0) {
+        header += `import type { ${typesToImport.join(", ")} } from "${options.apiClientTypeFile}"\n\n`;
+    }
+    content = header + content;
     fs.writeFileSync(apiClientPath, content, "utf8");
     console.log(`API client generated at: ${apiClientPath}`);
 };

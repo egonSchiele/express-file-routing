@@ -15,6 +15,7 @@ export interface Options {
      */
     directory?: string;
     apiClientDirectory?: string;
+    apiClientTypeFile?: string;
     /**
      * Additional methods that match an export from a route like `ws`
      *
