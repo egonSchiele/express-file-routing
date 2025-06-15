@@ -3,20 +3,25 @@
 // Any manual changes will be lost.
 import { apply } from "typestache";
 
-export const template = `export function {{functionName:string}}({{{args:string}}}): Promise<Response> {
-    return fetch(\`{{url:string}}\`, {
+export const template = `export async function {{functionName:string}}({{{args:string}}}): Promise<{{responseType:string}}> {
+    const response = await fetch(\`{{url:string}}\`, {
         method: "{{method:string}}",
         headers: {
           "Content-Type": "application/json",
         },
         ...options,
     });
+    if (!response.ok) {
+        console.log(\`Error calling API {{functionName}}\`);
+    }
+    return response.json();
 }
 `;
 
 export type TemplateType = {
   functionName: string;
   args: string;
+  responseType: string;
   url: string;
   method: string;
 };

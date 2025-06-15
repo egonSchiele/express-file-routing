@@ -99,10 +99,14 @@ const makeApiClient = (routes: Route[], options: Options = {}): void => {
     fs.mkdirSync(options.apiClientDirectory, { recursive: true })
   }
   const apiClientPath = path.join(options.apiClientDirectory, "apiClient.ts")
-  let content = "// Auto-generated API client\n\n"
+  let header = "// Auto-generated API client\n\n"
+  let content = ""
+  const typesToImport: string[] = []
+
   for (const { url, exports } of routes) {
     const exportedMethods = Object.entries(exports)
-
+    const methodNames = exportedMethods.map(([method, handler]) => method)
+    console.log({ methodNames })
     for (const [method, handler] of exportedMethods) {
       const methodKey = getMethodKey(method)
       const handlers = getHandlers(handler)
@@ -114,17 +118,34 @@ const makeApiClient = (routes: Route[], options: Options = {}): void => {
         continue
       }
       const methodName = methodKey.toUpperCase()
+      let responseType = "any"
+      const typeVarName = `${methodName.toLowerCase()}Type`
+      if (options.apiClientTypeFile && methodNames.includes(typeVarName)) {
+        const typeExport = exportedMethods.find(([key]) => key === typeVarName)
+        if (typeExport) {
+          responseType = typeExport[1] as any
+          typesToImport.push(responseType)
+        }
+      }
       if (url.startsWith("/api/")) {
         content +=
           renderClientTemplate({
             url: urlToUrlString(url),
             args: urlToArgs(url),
             method: methodName,
+            responseType,
             functionName: urlToFunctionName(url, methodName)
           }) + "\n"
       }
     }
   }
+  if (typesToImport.length > 0) {
+    header += `import type { ${typesToImport.join(", ")} } from "${
+      options.apiClientTypeFile
+    }"\n\n`
+  }
+
+  content = header + content
 
   fs.writeFileSync(apiClientPath, content, "utf8")
   console.log(`API client generated at: ${apiClientPath}`)
