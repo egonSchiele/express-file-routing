@@ -1,6 +1,7 @@
+import fs from "fs"
 import path from "path"
 
-import type { ExpressLike, HandlerWithReturn, Options } from "./types"
+import type { ExpressLike, HandlerWithReturn, Options, Route } from "./types"
 
 import config from "./config"
 
@@ -34,26 +35,11 @@ const wrapHandler = (handler: HandlerWithReturn): Handler => {
   return wrappedHandler
 }
 
-/**
- * Attach routes to an Express app or router instance
- *
- * ```ts
- * await createRouter(app)
- * ```
- *
- * @param app An express app or router instance
- * @param options An options object (optional)
- */
-const createRouter = async <T extends ExpressLike = ExpressLike>(
+const makeRoutes = <T extends ExpressLike = ExpressLike>(
   app: T,
+  routes: Route[],
   options: Options = {}
-): Promise<T> => {
-  const files = walkTree(
-    options.directory || path.join(PROJECT_DIRECTORY, "routes")
-  )
-
-  const routes = await generateRoutes(files)
-
+): void => {
   for (const { url, exports } of routes) {
     const exportedMethods = Object.entries(exports)
 
@@ -90,6 +76,59 @@ const createRouter = async <T extends ExpressLike = ExpressLike>(
         ])
       }
     }
+  }
+}
+
+const makeApiClient = (routes: Route[], options: Options = {}): void => {
+  if (!options.apiClientDirectory) {
+    return
+  }
+  // make options.apiClientDirectory if it does not exist
+  const dirExists = fs.existsSync(options.apiClientDirectory)
+  if (!dirExists) {
+    console.log(
+      `API client directory does not exist, creating: ${options.apiClientDirectory}`
+    )
+    fs.mkdirSync(options.apiClientDirectory, { recursive: true })
+  }
+  const apiClientPath = path.join(options.apiClientDirectory, "api-client.ts")
+  let content = "// Auto-generated API client\n\n"
+  content += `import { Request, Response } from 'express';\n\n`
+  for (const { url, exports } of routes) {
+    const exportedMethods = Object.entries(exports)
+
+    for (const [method, handler] of exportedMethods) {
+      const methodKey = getMethodKey(method)
+      console.log(`fetching method: ${methodKey} for URL: ${url}`)
+    }
+  }
+
+  fs.writeFileSync(apiClientPath, "testing")
+  console.log(`API client generated at: ${apiClientPath}`)
+}
+/**
+ * Attach routes to an Express app or router instance
+ *
+ * ```ts
+ * await createRouter(app)
+ * ```
+ *
+ * @param app An express app or router instance
+ * @param options An options object (optional)
+ */
+const createRouter = async <T extends ExpressLike = ExpressLike>(
+  app: T,
+  options: Options = {}
+): Promise<T> => {
+  const files = walkTree(
+    options.directory || path.join(PROJECT_DIRECTORY, "routes")
+  )
+
+  const routes = await generateRoutes(files)
+  makeRoutes(app, routes, options)
+
+  if (options.apiClientDirectory) {
+    makeApiClient(routes, options)
   }
 
   return app

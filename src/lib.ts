@@ -67,7 +67,6 @@ export const generateRoutes = async (files: File[]) => {
     const exports = await import(
       MODULE_IMPORT_PREFIX + path.join(file.path, file.name)
     )
-
     routes.push({
       url,
       priority,
