@@ -306,6 +306,7 @@ const wrapHandler = (handler) => {
             res.end();
         }
         catch (error) {
+            console.error("Error in handler:", error);
             res.status(500).send("Internal Server Error").end();
         }
     });
@@ -361,7 +362,6 @@ const makeApiClient = (routes, options = {}) => {
     for (const { url, exports } of routes) {
         const exportedMethods = Object.entries(exports);
         const methodNames = exportedMethods.map(([method, handler]) => method);
-        console.log({ methodNames });
         for (const [method, handler] of exportedMethods) {
             const methodKey = getMethodKey(method);
             if (!((_a = options.additionalMethods) === null || _a === void 0 ? void 0 : _a.includes(methodKey)) &&
