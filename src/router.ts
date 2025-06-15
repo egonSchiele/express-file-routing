@@ -34,7 +34,6 @@ const wrapHandler = (handler: HandlerWithReturn): Handler => {
       if (result !== undefined) {
         res.json(result)
       }
-      res.end()
     } catch (error) {
       console.error("Error in handler:", error)
       res.status(500).send("Internal Server Error").end()
