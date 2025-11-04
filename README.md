@@ -1,3 +1,30 @@
+# My fork of express-file-routing
+
+This fork adds support for auto-generating an API client for the frontend based on the routes created. In order to auto-generate this client, you must pass the `apiClientDirectory` parameter when creating the router. Example:
+
+```ts
+// routes
+app.use(
+  "/",
+  await router({
+    directory: path.join(ROOTDIR, "backend", "routes"),
+    apiClientDirectory: path.join(ROOTDIR, "..", "src/frontend/generated"),
+  })
+);
+```
+
+This will create the file `apiClient.ts` within the provided directory. This generation happens whenever the server starts up. This does mean that starting the server introduces a side effect, which is unfortunate, but convenient.
+
+For more info, see the `makeApiClient` function within `src/router.ts`.
+
+## Types for generated client
+The generated client will use `any` types. If you want to add better typing, you can do it like this.
+
+1. Suppose you export a `get` function from a route. You can also export a constant named `getType`. `getType` should be a string containing the return type of `get`. 
+2. Along with `apiClientDirectory`, set a `apiClientTypeFile` param, which points to the name of a file containing the types that the generated client will import. Note: **you must set this param, otherwise type info won't be pulled**.
+
+The original documentation for this repo follows:
+
 # express-file-routing
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/matthiaaas/express-file-routing?color=brightgreen&label=latest)
