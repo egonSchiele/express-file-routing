@@ -4,17 +4,22 @@
 import { apply } from "typestache";
 
 export const template = `export async function {{functionName:string}}({{{args:string}}}): Promise<{{responseType:string}}> {
-    const response = await fetch(\`{{url:string}}\`, {
-        method: "{{method:string}}",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        ...options,
-    });
-    if (!response.ok) {
-        console.log(\`Error calling API {{functionName}}\`);
+    try {
+        const response = await fetch(\`{{url:string}}\`, {
+            method: "{{method:string}}",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            ...options,
+        });
+        if (!response.ok) {
+            console.log(\`Error calling API {{functionName}}\`);
+        }
+        return response.json();
+    } catch (error) {
+        console.error(\`Error in {{functionName}}:\`, error);
+        return { success: false, error: error.message } as {{responseType:string}};
     }
-    return response.json();
 }
 `;
 
