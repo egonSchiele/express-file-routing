@@ -1,8 +1,8 @@
 import type { ParsedPath } from "path"
 
-import type { HandlerWithReturn, Route } from "./types"
+import type { HandlerWithReturn, Route } from "./types.js"
 
-import config from "./config"
+import config from "./config.js"
 
 export const isCjs = () => typeof module !== "undefined" && !!module?.exports
 

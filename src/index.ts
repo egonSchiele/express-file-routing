@@ -1,8 +1,8 @@
 import { Router, type RouterOptions } from "express"
 
-import type { Options } from "./types"
+import type { Options } from "./types.js"
 
-import createRouter from "./router"
+import createRouter from "./router.js"
 
 export default createRouter
 
@@ -19,7 +19,7 @@ export { createRouter }
  */
 export const router = async (
   options: Options & { routerOptions?: RouterOptions } = {}
-) => {
+): Promise<Router> => {
   const routerOptions = options?.routerOptions || {}
 
   return await createRouter(Router(routerOptions), options)

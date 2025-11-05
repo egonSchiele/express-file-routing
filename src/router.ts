@@ -1,9 +1,9 @@
 import fs from "fs"
 import path from "path"
 
-import type { ExpressLike, HandlerWithReturn, Options, Route } from "./types"
+import type { ExpressLike, HandlerWithReturn, Options, Route } from "./types.js"
 
-import config from "./config"
+import config from "./config.js"
 
 import { Handler, NextFunction, Request, Response } from "express"
 import {
@@ -12,9 +12,9 @@ import {
   urlToFunctionName,
   urlToUrlString,
   walkTree
-} from "./lib"
-import { getHandlers, getMethodKey, isHandler } from "./utils"
-import renderClientTemplate from "./templates/apiClient"
+} from "./lib.js"
+import { getHandlers, getMethodKey, isHandler } from "./utils.js"
+import renderClientTemplate from "./templates/apiClient.js"
 
 const CJS_MAIN_FILENAME =
   typeof require !== "undefined" && require.main?.filename

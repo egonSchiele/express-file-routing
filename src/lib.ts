@@ -1,7 +1,7 @@
 import { readdirSync, statSync } from "fs"
 import path from "path"
 
-import type { File, Route } from "./types"
+import type { File, Route } from "./types.js"
 
 import {
   buildRoutePath,
@@ -11,7 +11,7 @@ import {
   isFileIgnored,
   mergePaths,
   prioritizeRoutes
-} from "./utils"
+} from "./utils.js"
 
 const IS_ESM = !isCjs()
 
