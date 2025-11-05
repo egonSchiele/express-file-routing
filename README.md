@@ -23,6 +23,14 @@ The generated client will use `any` types. If you want to add better typing, you
 1. Suppose you export a `get` function from a route. You can also export a constant named `getType`. `getType` should be a string containing the return type of `get`. 
 2. Along with `apiClientDirectory`, set a `apiClientTypeFile` param, which points to the name of a file containing the types that the generated client will import. Note: **you must set this param, otherwise type info won't be pulled**.
 
+## Publishing
+
+```
+pnpm run build
+```
+
+Then commit the changes to the `dist` folder and push.
+
 The original documentation for this repo follows:
 
 # express-file-routing
