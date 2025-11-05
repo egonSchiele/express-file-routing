@@ -17,7 +17,7 @@ export const template = `export async function {{functionName:string}}({{{args:s
         return response.json();
     } catch (error) {
         console.error(\`Error in {{functionName}}:\`, error);
-        return { success: false, error: error.message } as {{responseType:string}};
+        return { success: false, error } as {{responseType:string}};
     }
 }
 `;
