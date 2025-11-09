@@ -31,6 +31,9 @@ if (process.argv.length < 4) {
   console.log(
     "Example: compile-client ./routes ./generated ./types/api-types.ts"
   )
+  console.log(
+    "The routes directory path should be in your dist folder so that any path aliases you use are accounted for.\n The apiClientTypeFile should be exactly the path that should get imported in the generated apiClient file.\nThe apiClientDirectory should be in your source code, since it will get included in the build."
+  )
   process.exit(1)
 }
 
