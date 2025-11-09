@@ -15,6 +15,10 @@ export const compileClient = async () => {
     apiClientTypeFile
   }
   const files = walkTree(options.routesDirectory)
+  console.log(`Found ${files.length} route files:`)
+  for (const file of files) {
+    console.log(`- ${file.rel}`)
+  }
 
   const routes = await generateRoutes(files)
   makeApiClient(routes, options)
@@ -24,7 +28,9 @@ if (process.argv.length < 4) {
   console.log(
     "Usage: compile-client <routesDirectory> <apiClientDirectory> <apiClientTypeFile>"
   )
-  console.log("Example: compile-client ./routes ./generated ./types/api-types")
+  console.log(
+    "Example: compile-client ./routes ./generated ./types/api-types.ts"
+  )
   process.exit(1)
 }
 
