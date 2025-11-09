@@ -33,7 +33,7 @@ const wrapHandler = (handler) => {
     });
     return wrappedHandler;
 };
-const makeRoutes = (app, routes, options = {}) => {
+export const makeRoutes = (app, routes, options = {}) => {
     var _a;
     for (const { url, exports } of routes) {
         const exportedMethods = Object.entries(exports);
@@ -65,7 +65,7 @@ const makeRoutes = (app, routes, options = {}) => {
         }
     }
 };
-const makeApiClient = (routes, options = {}) => {
+export const makeApiClient = (routes, options = {}) => {
     var _a;
     if (!options.apiClientDirectory) {
         return;

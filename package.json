@@ -8,19 +8,23 @@
     "test": "jest",
     "build": "rm -rf dist && pnpm run templates && tsc",
     "dev": "ts-node-dev --transpile-only --files --quiet ./examples/with-typescript/app.ts",
-    "templates": "typestache /Users/adit/express-file-routing/src/templates -v"
+    "templates": "typestache /Users/adit/express-file-routing/src/templates -v",
+    "compile-client": "node ./dist/scripts/compile-client.js"
   },
   "files": [
-    "./dist"
+    "./dist/src"
   ],
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.js"
+      "import": "./dist/src/index.js",
+      "require": "./dist/src/index.js"
     }
   },
+  "bin": {
+    "compile-client": "./dist/scripts/compile-client.js"
+  },
   "type": "module",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/src/index.d.ts",
   "keywords": [
     "express",
     "api",

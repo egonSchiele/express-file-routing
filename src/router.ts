@@ -42,7 +42,7 @@ const wrapHandler = (handler: HandlerWithReturn): Handler => {
   return wrappedHandler
 }
 
-const makeRoutes = <T extends ExpressLike = ExpressLike>(
+export const makeRoutes = <T extends ExpressLike = ExpressLike>(
   app: T,
   routes: Route[],
   options: Options = {}
@@ -86,7 +86,7 @@ const makeRoutes = <T extends ExpressLike = ExpressLike>(
   }
 }
 
-const makeApiClient = (routes: Route[], options: Options = {}): void => {
+export const makeApiClient = (routes: Route[], options: Options = {}): void => {
   if (!options.apiClientDirectory) {
     return
   }
