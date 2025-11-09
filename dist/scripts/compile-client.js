@@ -10,9 +10,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { makeApiClient } from "../src/router.js";
 import { generateRoutes, walkTree } from "../src/lib.js";
+import path from "path";
 export const compileClient = () => __awaiter(void 0, void 0, void 0, function* () {
     // Read command-line arguments
-    const routesDirectory = process.argv[2];
+    const routesDirectory = path.join(process.cwd(), process.argv[2]);
     const apiClientDirectory = process.argv[3];
     const apiClientTypeFile = process.argv.length > 4 ? process.argv[4] : undefined;
     const options = {
@@ -21,7 +22,7 @@ export const compileClient = () => __awaiter(void 0, void 0, void 0, function* (
         apiClientTypeFile
     };
     const files = walkTree(options.routesDirectory);
-    console.log(`Found ${files.length} route files:`);
+    console.log(`\x1b[32m Found ${files.length} route files:\x1b[m`);
     for (const file of files) {
         console.log(`- ${file.rel}`);
     }
