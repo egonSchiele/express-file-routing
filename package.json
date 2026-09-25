@@ -8,7 +8,7 @@
     "test": "jest",
     "build": "rm -rf dist && pnpm run templates && tsc",
     "dev": "ts-node-dev --transpile-only --files --quiet ./examples/with-typescript/app.ts",
-    "templates": "typestache /Users/adit/express-file-routing/src/templates -v",
+    "templates": "typestache src/templates -v",
     "compile-client": "node ./dist/scripts/compile-client.js"
   },
   "files": [
