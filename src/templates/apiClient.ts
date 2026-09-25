@@ -1,5 +1,5 @@
 // THIS FILE WAS AUTO-GENERATED
-// Source: /Users/adit/express-file-routing/src/templates/apiClient.mustache
+// Source: src/templates/apiClient.mustache
 // Any manual changes will be lost.
 import { apply } from "typestache";
 
@@ -15,10 +15,11 @@ export const template = `export async function {{{functionName:string}}}({{{args
         if (!response.ok) {
             console.log(\`Error calling API {{{functionName}}}\`);
         }
-        return response.json();
+        return await response.json();
     } catch (error) {
         console.error(\`Error in {{{functionName}}}:\`, error);
-        return { success: false, error } as {{{responseType:string}}};
+        const message = error instanceof Error ? error.message : String(error);
+        return { success: false, error: message } as {{{responseType:string}}};
     }
 }
 `;
